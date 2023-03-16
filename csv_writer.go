@@ -31,6 +31,7 @@ type CSVWriter struct {
 	*csv.Writer
 	HeaderStyle KeyStyle
 	Transpose   bool
+	SkipHeader  bool
 }
 
 // NewCSVWriter returns new CSVWriter with JSONPointerStyle.
@@ -38,6 +39,7 @@ func NewCSVWriter(w io.Writer) *CSVWriter {
 	return &CSVWriter{
 		csv.NewWriter(w),
 		JSONPointerStyle,
+		false,
 		false,
 	}
 }
@@ -60,8 +62,10 @@ func (w *CSVWriter) writeCSV(results []KeyValue) error {
 	keys := pts.Strings()
 	header := w.getHeader(pts)
 
-	if err := w.Write(header); err != nil {
-		return err
+	if !w.SkipHeader {
+		if err := w.Write(header); err != nil {
+			return err
+		}
 	}
 
 	for _, result := range results {
